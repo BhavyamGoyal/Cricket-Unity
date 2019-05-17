@@ -24,9 +24,13 @@ namespace BallSystem
         private Vector3 direction; // the direction vector the ball is going in
         private Rigidbody rb; // rigidbody of the ball
         private float spinBy; // value to spin the ball by
-        private bool firstBounce; 
+        private bool firstBounce;
         public float BallSpeed { set { ballSpeed = value; } }
         public int BallType { set { ballType = value; } }
+        public void SetBounceScalar(float bounceValue)
+        {
+            bounceScalar = bounceValue * 0.1f;
+        }
         public void SetSpinScalar(float spinValue)
         {
             spinScalar = spinValue;
@@ -58,7 +62,8 @@ namespace BallSystem
                 spinBy = spinScalar / ballSpeed;
 
                 if (!firstBounce)
-                {   firstBounce = true; // set the firstBounce bool to true
+                {
+                    firstBounce = true; // set the firstBounce bool to true
                     rb.useGravity = true; // allow the gravity to affect the ball
                     direction = new Vector3(spinBy, -direction.y * (bounceScalar * ballSpeed), direction.z);
                     direction = Vector3.Normalize(direction); // normalize the direction value
@@ -69,15 +74,16 @@ namespace BallSystem
             else if (collision.gameObject.CompareTag("Stump"))
             {
                 Debug.Log("hit the stumps");
-                GameManager.Instance.SetForNextBall();
                 if (!Stumphit)
                 {
                     Stumphit = true;
                     GameManager.Instance.UpdateScore();
+                    GameManager.Instance.SetForNextBall();
                 }
-                collision.gameObject.GetComponent<Rigidbody>().useGravity = true; // set the stump's rigidbody to be affected by gravity
+                collision.gameObject.GetComponent<Rigidbody>().useGravity = true;
             }
-            else if (collision.gameObject.CompareTag("World")) {
+            else if (collision.gameObject.CompareTag("World"))
+            {
                 GameManager.Instance.SetForNextBall();
             }
         }
@@ -85,11 +91,10 @@ namespace BallSystem
         public void ThrowBall()
         {
             if (!isBallThrown)
-            { // if the ball is not thrown, throw the ball
+            {
                 isBallThrown = true;
                 Stumphit = false;
-                //CanvasManagerScript.instance.EnableBatSwipePanel(); // Enable the bat swipe panel 
-                targetPosition = markerPos.GetMarkerPosition(); // make the balls target position to the markers position
+                targetPosition = markerPos.GetMarkerPosition();
                 direction = Vector3.Normalize(targetPosition - startPosition); // calculate the direction vector
                 rb.AddForce(direction * ballSpeed, ForceMode.Impulse); // Add an instant force impulse in the direction vector multiplied by ballSpeed to the ball considering its mass
             }
